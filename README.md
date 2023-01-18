@@ -15,6 +15,7 @@ make run
 ```
 ---
 ### Details about the solution
+The solution currently expects one to provide x,y coordinates in the main function - there is an example in the code. 
 We can think of this problem as a matrix board (with dimensions as m X n) with left-lowest (0, n-1) and right-lowest(m-1, n-1) cells as invalid - i.e. knight moves shall not yield those two cells.
 We need to check boundary conditions as well (including the two cells above) i.e. the knight move shall not go beyond the matrix dimensions i.e. row should be confined between 0 and m-1 while col should be between 0 and n-1
 
