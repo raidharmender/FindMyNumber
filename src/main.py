@@ -12,7 +12,21 @@ def main():
     logger = logger_setup()
     try:
         # _parser = argparse.ArgumentParser(description="Input to start with")
-        mat = Matrix(
+
+        # for _i in range(10):
+        row = int(input('Enter row index : '))
+        col = int(input('Enter col index : '))
+        for _i in range(10):
+            mat = new_mat()
+            logger.info(mat.gen_seq(row, col))
+    except ValueError as val_err:
+        logger.exception(val_err)
+
+def new_mat():
+    """
+    Construct a new matrix
+    """
+    mat = Matrix(
                 4,
                 5,
                 [
@@ -22,13 +36,7 @@ def main():
                     [None, 1, 2, 3, None],
                 ],
             )
-        # logger.info(mat.get_moves(1, 1))
-        # logger.info(mat.get_moves(2, 2))
-        # logger.info(mat.get_moves(0, 0))
-        # logger.info(mat.get_moves(2, 4))
-        logger.info(mat.gen_seq(1,0))
-    except ValueError as val_err:
-        logger.exception(val_err)
+    return mat
 
 
 def logger_setup():

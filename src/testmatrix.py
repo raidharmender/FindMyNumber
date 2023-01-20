@@ -2,6 +2,7 @@
 Test script for matrix
 """
 import unittest
+from consts import VOWELS
 from matrix import Matrix
 
 
@@ -32,6 +33,27 @@ class TestMatrix(unittest.TestCase):
             ],
         )
         self.assertEqual(len(test_mat.gen_seq(0, 0)), 10)
+
+    def test_knight_vowel(self):
+        """
+        Test case for more than 2 vowels
+        """
+        test_mat = Matrix(
+            4,
+            5,
+            [
+                ["A", "B", "C", "D", "E"],
+                ["F", "G", "H", "I", "J"],
+                ["K", "L", "M", "N", "O"],
+                [None, 1, 2, 3, None],
+            ],
+        )
+        for _i in range(20):
+            count = 0
+            for elem in test_mat.gen_seq(1,0):
+                if elem in VOWELS:
+                    count += 1
+            self.assertLessEqual(count, 2)
 
     def test_knight_seq_start(self):
         """

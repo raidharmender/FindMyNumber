@@ -6,6 +6,7 @@ from typing import List, Tuple
 from itertools import product
 from consts import SEQ_LEN, VOWEL_COUNT, VOWELS
 
+
 class Matrix:
     """
     Initialize the matrix
@@ -24,67 +25,73 @@ class Matrix:
         else:
             self.arr = [[None] * col] * row
 
-    def random_idx(self, upper_limit: int) -> int:
-        """
-        Generate random index number between 0 and x
-        """
-        return randint(0, upper_limit)
-        
     def add_key(self, row: int, col: int) -> Tuple[int, int]:
         """
-        Add key in seq member variable by randomly selecting one move from the allowed_moves
+        Add key in seq member variable by randomly selecting one move from the next_moves
         """
-        allowed_moves = self.get_moves(row, col)
-        idx = self.random_idx(len(allowed_moves) - 1)
-        (arr_row, arr_col) = allowed_moves[idx]
-        arr_row, arr_col = self.check_vowels(allowed_moves, arr_row, arr_col)
-        self.seq.append(str(self.arr[arr_row][arr_col]))
+        next_moves = self.get_moves(row, col)
+        prev = None
+        if len(self.seq) >=2:
+            prev = self.seq[-2]
+        next_moves = [(row, col) for (row, col) in next_moves if self.arr[row][col] != prev] 
+        arr_row, arr_col = next_moves[randint(0, len(next_moves) - 1)]
+        if arr_row > -1 and arr_col > -1:
+            self.seq.append(str(self.arr[arr_row][arr_col]))
         return (arr_row, arr_col)
-
-    def check_vowels(self, allowed_moves, arr_row, arr_col) -> Tuple[int, int]:
-        """
-        Perform vowel count check and seq
-        """
-        value = str(self.arr[arr_row][arr_col])
-        if value in VOWELS:
-            self.vowel +=1
-            if self.vowel <= VOWEL_COUNT:
-                self.seq.append(value)
-            elif self.vowel == VOWEL_COUNT: # regenerate move
-                for idx in range(1, len(allowed_moves)):
-                    (arr_row, arr_col) = allowed_moves[idx]
-                    value = self.arr[arr_row][arr_col]
-                    if value in VOWELS:
-                        continue
-                    else:
-                        return (arr_row, arr_col)
-                return (None, None)
-        return (arr_row, arr_col)
-
-    def check_dim(self, row: int, col: int) -> bool:
-        """
-        Compare the input dimensions with matrix dimensions
-        """
-        if self.row >= row and self.col >= col:
-            return True
-        return False
 
     def gen_seq(self, row: int, col: int, seq_len: int = SEQ_LEN) -> str:
         """
         Generate sequence of length SEQ_LEN
         """
-        in_row = -1
-        in_col = -1
+        (in_row, in_col) = self.reset_vars()
+
         if self.check_dim(row, col):
             self.seq.append(self.arr[row][col])
             for _idx in range(seq_len - 1):
                 if in_row != -1 and in_col != -1:
                     (in_row, in_col) = self.add_key(in_row, in_col)
+                elif in_row is None and in_col is None:
+                    return self.seq
                 else:
                     (in_row, in_col) = self.add_key(row, col)
-            return "".join(self.seq)
-        else:
-            raise ValueError("Input dimensions do not match with matrix")
+            for idx, elem in enumerate(self.seq):
+                count = 0
+                if elem in VOWELS:
+                    if count < VOWEL_COUNT:
+                        count += 1
+                    else:
+                        return self.seq[:idx]
+            return self.seq
+        raise ValueError("Input dimensions do not match with matrix")
+
+    def reset_vars(self) -> Tuple[int, int, int, int]:
+        """
+        Gen Seq resets some variables which can be used by the object
+        """
+        in_row, in_col = [-1] * 2
+        self.seq = []
+        return (in_row, in_col)
+
+    def get_moves(
+        self, row: int, col: int) -> List[Tuple[int, int]]:
+        """
+        Generate knight moves and filter invalid outcomes
+        """
+        if row < 0 or col < 0:
+            raise ValueError("Rows or columns cannot be negative")
+        next_moves = list(product([row - 1, row + 1], [col - 2, col + 2])) + list(
+            product([row - 2, row + 2], [col - 1, col + 1])
+        )
+        next_moves = [
+            (row, col)
+            for row, col in next_moves
+            if row > -1
+            and col > -1
+            and row < self.row  # Avoid crossing row boundary
+            and col < self.col  # Avoid crossing the col boundary
+            and self.arr[row][col]  ## Avoid invalid cells marked as None
+        ]
+        return next_moves
 
     def __str__(self) -> str:
         return "\n".join([str(row) for row in self.arr])
@@ -102,22 +109,23 @@ class Matrix:
         """
         return (self.row, self.col)
 
-    def get_moves(self, row: int, col: int) -> List[Tuple[int, int]]:
+    def check_dim(self, row: int, col: int) -> bool:
         """
-        Generate knight moves and filter invalid outcomes
+        Compare the input dimensions with matrix dimensions
         """
-        if row < 0 or col < 0:
-            raise ValueError("Rows or columns cannot be negative")
-        allowed_moves = list(product([row - 1, row + 1], [col - 2, col + 2])) + list(
-            product([row - 2, row + 2], [col - 1, col + 1])
-        )
-        allowed_moves = [
-            (row, col)
-            for row, col in allowed_moves
-            if row > -1
-            and col > -1
-            and row < self.row
-            and col < self.col
-            and self.arr[row][col]
-        ]
-        return allowed_moves
+        if self.row >= row and self.col >= col:
+            return True
+        return False
+
+    def check_vowels(self, arr_row, arr_col) -> Tuple[int, int]:
+        """
+        Perform vowel count check and seq
+        """
+        value = str(self.arr[arr_row][arr_col])
+        if value in VOWELS:
+            if self.vowel < VOWEL_COUNT:
+                self.vowel += 1
+                return (arr_row, arr_col)
+            elif self.vowel == VOWEL_COUNT:  # End the sequence
+                return (None, None)
+        return (arr_row, arr_col)
