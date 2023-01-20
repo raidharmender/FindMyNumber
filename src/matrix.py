@@ -60,7 +60,12 @@ class Matrix:
                     if count < VOWEL_COUNT:
                         count += 1
                     else:
-                        return self.seq[:idx]
+                        self.seq = self.seq[: idx - 1]
+                        break
+            for idx, elem in enumerate(self.seq):
+                if idx > 1 and self.seq[idx] == self.seq[idx - 2]:
+                    self.seq = self.seq[: idx - 1]
+                    break
             return self.seq
         raise ValueError("Input dimensions do not match with matrix")
 
@@ -116,16 +121,3 @@ class Matrix:
         if self.row >= row and self.col >= col:
             return True
         return False
-
-    def check_vowels(self, arr_row, arr_col) -> Tuple[int, int]:
-        """
-        Perform vowel count check and seq
-        """
-        value = str(self.arr[arr_row][arr_col])
-        if value in VOWELS:
-            if self.vowel < VOWEL_COUNT:
-                self.vowel += 1
-                return (arr_row, arr_col)
-            elif self.vowel == VOWEL_COUNT:  # End the sequence
-                return (None, None)
-        return (arr_row, arr_col)
